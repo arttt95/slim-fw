@@ -2,11 +2,64 @@
 
 //use Slim\Http\Request;
 use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as response;
+use \Psr\Http\Message\ResponseInterface as Response;
 
 require 'vendor/autoload.php';
 
-$app = new \Slim\App;
+$app = new \Slim\App([
+    'settings' => [
+        'displayErrorDetails' => true
+    ]
+]);
+
+////////////////////////////////////
+// Container Dependency Injection //
+////////////////////////////////////
+class Servico {
+}
+
+// Container Pimple
+$container = $app->getContainer();
+$container['servico'] = function() {
+    return new Servico;
+};
+
+$app->get('/servico', function(Request $request, Response $response) {
+
+    $servico = $this->get('servico');
+    var_dump($servico);
+
+});
+
+///////////////////////////////
+// Controllers como Serviços //
+///////////////////////////////
+
+/*
+$container = $app->getContainer();
+$container['View'] = function() {
+    return new MyApp\View;
+};
+
+$app->get('/usuario', '\MyApp\controllers\Home:index');
+*/
+
+$container = $app->getContainer();
+$container['Home'] = function() {
+    return new MyApp\controllers\Home( new MyApp\View);
+};
+
+$app->get('/usuario', 'Home:index');
+
+
+
+
+
+
+
+$app->run();
+
+/*
 
 // Padrão Psr7
 $app->get('/postagens', function(Request $request, Response $response) {
@@ -18,15 +71,12 @@ $app->get('/postagens', function(Request $request, Response $response) {
 
 });
 
-/*
-Tipos de requisição ou Verbos HTTP
+// Tipos de requisição ou Verbos HTTP
 
-get -> Recuperar recursos do servidor (Select)
-post -> Criar dado no servidor (Insert)
-put -> Atualizar dados no servidor (Update)
-delete -> Deletar dados no servidor (Delete)
-
-*/
+// get -> Recuperar recursos do servidor (Select)
+// post -> Criar dado no servidor (Insert)
+// put -> Atualizar dados no servidor (Update)
+// delete -> Deletar dados no servidor (Delete)
 
 /////////////////
 // POST METHOD //
@@ -39,10 +89,8 @@ $app->post('/usuarios/adiciona', function(Request $request, Response $response) 
     $nome = $post['nome'];
     $email = $post['email'];
 
-    /*
-    Salavar no banco de dados com INSERT INTO...
-    ... Lógica ...
-    */
+    //Salavar no banco de dados com INSERT INTO...
+    //... Lógica ...
 
     return $response->getBody()->write(
         "Nome: " . $nome . " - E-mail: " . $email
@@ -62,10 +110,10 @@ $app->put('/usuarios/atualiza', function(Request $request, Response $response) {
     $nome = $post['nome'];
     $email = $post['email'];
 
-    /*
-    Atualizar o banco de dados utilizando o UPDATE...
-    ... Lógica ...
-    */
+    
+    //Atualizar o banco de dados utilizando o UPDATE...
+    //... Lógica ...
+    
 
     return $response->getBody()->write(
         "Sucesso ao atualizar e o ID é: " . $id 
@@ -81,10 +129,8 @@ $app->delete('/usuarios/remove/{id}', function(Request $request, Response $respo
     
     $id = $request->getAttribute('id');
 
-    /*
-    Deletar no banco de dados utilizando o DELETE...
-    ... Lógica ...
-    */
+    // Deletar no banco de dados utilizando o DELETE...
+    // ... Lógica ...
 
     return $response->getBody()->write(
         "Sucesso ao deletar e o ID é: " . $id 
@@ -92,8 +138,7 @@ $app->delete('/usuarios/remove/{id}', function(Request $request, Response $respo
 
 });
 
-
-$app->run();
+/*
 
 /*
 $app->get('/postagens-2', function() {
