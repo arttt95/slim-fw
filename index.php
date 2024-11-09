@@ -3,6 +3,7 @@
 //use Slim\Http\Request;
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 require 'vendor/autoload.php';
 
@@ -12,13 +13,225 @@ $app = new \Slim\App([
     ]
 ]);
 
+//////////////
+// AULA 554 //
+//////////////
+
+$container = $app->getContainer();
+$container['db'] = function() {
+
+    $capsule = new Capsule;
+
+    $capsule->addConnection([
+    'driver' => 'mysql',
+    'host' => 'localhost',
+    'database' => 'slim',
+    'username' => 'root',
+    'password' => '',
+    'charset' => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix' => '',
+    ]);
+
+    $capsule->setAsGlobal();
+    $capsule->bootEloquent();
+
+    return $capsule;
+
+};
+
+$app->get('/usuarios', function(Request $request, Response $response) {
+
+    $db = $this->get('db');
+
+    //////////////////////
+    // CRIANDO TABELAS  //
+    // COM SCHEMA BUILD //
+    //////////////////////
+
+    // $db->schema()->dropIfExists('usuarios');
+    // $db->schema()->create('usuarios', function($table) {
+    //     $table->increments('id');
+    //     $table->string('nome');
+    //     $table->string('email');
+    //     $table->timestamps();
+    // });
+
+    //////////////////////
+    //  INSERIR DADOS   //
+    // COM SCHEMA BUILD //
+    //////////////////////
+
+    // $db->table('usuarios')->insert([
+
+    //     'nome' => 'Lionel Pessi',
+    //     'email' => 'boludo@gmail.com'
+
+    // ]);
+
+    ////////////////////////
+    //  ATUALIZAR DADOS   //
+    //  COM SCHEMA BUILD  //
+    ////////////////////////
+
+    // $db->table('usuarios')->where(
+    //     'id', 1
+    // )->update([
+    //     'nome' => 'Lionel Pessi',
+    //     'email' => 'boludo@gmail.com'
+    // ]);
+
+    ////////////////////////
+    //    DELETAR DADOS   //
+    //  COM SCHEMA BUILD  //
+    ////////////////////////
+
+    // $db->table('usuarios')->where(
+    //     'id', 1
+    // )->delete();
+
+    ////////////////////////
+    //    LISTAR DADOS    //
+    //  COM SCHEMA BUILD  //
+    ////////////////////////
+
+    $tb_usuarios = $db->table('usuarios');
+
+    $usuarios = $tb_usuarios->get();
+
+    foreach($usuarios as $chave => $usuario) {
+
+        echo $chave . ' => ' . $usuario->nome;
+        echo '<br>';
+
+    }
+    
+
+});
+
+
+
+
+
+$app->run();
+
+/*
+////////////////////////
+// Tipos de Respostas //
+////////////////////////
+
+// CABEÇALHO, TEXTO, JSON, XML
+
+////////////
+// HEADER //
+////////////
+
+$app->get('/header', function(Request $request, Response $response) {
+
+    $response->getBody()->write('Esse é um retorno header');
+    return $response->withHeader('allow', 'PUT')
+                    ->withAddedHeader('Content-Length', 10);
+
+});
+
+//////////
+// JSON //
+//////////
+
+$app->get('/json', function(Request $request, Response $response) {
+
+    $data = [
+        "nome" => "Cristiano Penaldo",
+        "endereco" => "Rua Um"
+    ];
+
+    $response = $response->withHeader(
+        'Content-Type', 'application/json'
+    );
+
+    $response->getBody()->write(json_encode($data));
+    
+    return $response;
+
+});
+
+/////////
+// XML //
+/////////
+
+$app->get('/xml', function(Request $request, Response $response) {
+
+    $xml = file_get_contents('arquivo');
+
+    $response = $response->withHeader(
+        'Content-Type', 'application/xml'
+    );
+
+    $response->getBody()->write($xml);
+
+    return $response;
+
+});
+
+$app-get();
+
+////////////////
+// MIDDLEWARE //
+////////////////
+
+// Camada 1 -> Middleware
+$app->add(function($request, $response, $next) {
+
+    $response->write('Início camada 1 + ');
+    //return $next($request, $response);
+    $response = $next($request, $response);
+
+    return $response->write(' + Fim da camada 1');
+
+});
+
+
+// Camada 2 -> Middleware
+$app->add(function($request, $response, $next) {
+
+    $response->write('Início camada 2 + ');
+    //return $next($request, $response);
+    $response = $next($request, $response);
+
+    return $response->write(' + Fim da camada 2');
+
+});
+
+$app->get('/usuarios', function(Request $request, Response $response) {
+
+    $response->getBody()->write('Ação principal usuarios');
+
+});
+
+$app->get('/postagens', function(Request $request, Response $response) {
+
+    $response->getBody()->write('Ação principal postagens');
+
+});*/
+
+
+
+
+//////////////
+// AULA 553 //
+//////////////
+
+/*
+
 ////////////////////////////////////
 // Container Dependency Injection //
 ////////////////////////////////////
+
 class Servico {
 }
 
 // Container Pimple
+
 $container = $app->getContainer();
 $container['servico'] = function() {
     return new Servico;
@@ -34,7 +247,7 @@ $app->get('/servico', function(Request $request, Response $response) {
 ///////////////////////////////
 // Controllers como Serviços //
 ///////////////////////////////
-
+*/
 /*
 $container = $app->getContainer();
 $container['View'] = function() {
@@ -43,21 +256,18 @@ $container['View'] = function() {
 
 $app->get('/usuario', '\MyApp\controllers\Home:index');
 */
-
+/*
 $container = $app->getContainer();
 $container['Home'] = function() {
     return new MyApp\controllers\Home( new MyApp\View);
 };
 
 $app->get('/usuario', 'Home:index');
+*/
 
-
-
-
-
-
-
-$app->run();
+//////////////
+// AULA 552 //
+//////////////
 
 /*
 
@@ -140,6 +350,10 @@ $app->delete('/usuarios/remove/{id}', function(Request $request, Response $respo
 
 /*
 
+//////////////
+// AULA 551 //
+//////////////
+
 /*
 $app->get('/postagens-2', function() {
     
@@ -217,3 +431,5 @@ $app->group('/v5', function() {
 
 });
 */
+
+?>
